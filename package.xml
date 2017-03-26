@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>adafruit-10dof-imu</name>
+  <name>adafruit_10dof_imu</name>
   <version>0.0.1</version>
   <description>The adafruit 10dof imu package for ROS</description>
 
