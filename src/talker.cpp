@@ -1,13 +1,29 @@
 #include "ros/ros.h"
 #include "sensor_msgs/Imu.h"
 
-#include <sstream>
+#include <LSM303DLHC_Magnetometer.h>
+#include <LSM303DLHC_Accelerometer.h>
+#include <L3GD20H_Gyroscope.h>
+#include <LSM303DLHC_Magnetometer.cpp>
+#include <LSM303DLHC_Accelerometer.cpp>
+#include <L3GD20H_Gyroscope.cpp>
+#include <I2CBus.cpp>
+#include <unistd.h>
 
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
  */
 int main(int argc, char **argv)
 {
+  const char* i2cDevice = "/dev/i2c-1";
+  LSM303DLHC_Magnetometer mag(i2cDevice);
+  LSM303DLHC_Accelerometer acc(i2cDevice);
+  L3GD20H_Gyroscope gyr(i2cDevice);
+
+  gyr.begin();
+  mag.begin();
+  acc.begin();
+
   /**
    * The ros::init() function needs to see argc and argv so that it can perform
    * any ROS arguments and name remapping that were provided at the command line.
@@ -60,18 +76,22 @@ int main(int argc, char **argv)
      */
     sensor_msgs::Imu imu;
 
+    mag.read();
+    acc.read();
+    gyr.read();
+
     imu.header.stamp = ros::Time::now();
     imu.header.frame_id = "base_imu_link";
     imu.orientation_covariance = {0.0025, 0, 0, 0, 0.0025, 0, 0, 0, 0.0025};
     imu.angular_velocity_covariance = {0.0025, 0, 0, 0, 0.0025, 0, 0, 0, 0.0025};
     imu.linear_acceleration_covariance = {0.0025, 0, 0, 0, 0.0025, 0, 0, 0, 0.0025};
-    imu.orientation.x = 1;
-    imu.orientation.y = 1;
-    imu.orientation.z = 1;
+    imu.orientation.x = mag.raw.x;
+    imu.orientation.y = mag.raw.y;
+    imu.orientation.z = mag.raw.z;
     imu.orientation.w = 1;
-    imu.angular_velocity.x = 1.0;
-    imu.angular_velocity.y = 1.0;
-    imu.angular_velocity.z = 1.0;
+    imu.angular_velocity.x = gyr.raw.x;
+    imu.angular_velocity.y = gyr.raw.y;
+    imu.angular_velocity.z = gyr.raw.z;
     imu.linear_acceleration.x = 1.0;
     imu.linear_acceleration.y = 1.0;
     imu.linear_acceleration.z = 1.0;
